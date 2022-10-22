@@ -121,6 +121,28 @@ module.exports = function (context) {
                                     newPods.pods[name] = Object.assign({type: 'pod'}, pod.$);
                                     log(`${id} requires pod: ${name}`);
                                 });
+
+                                const podspec = (platform['podspec'] || [])[0];
+                                if(podspec){
+                                    const podspecConfig = (podspec['config'] || [])[0];
+                                    const podspecPods = (podspec['pods'] || [])[0];
+                                    if(podspecConfig){
+                                        (podspecConfig.source || []).forEach(function (podspecSource) {
+                                            log(`${id} requires pod source: ${podspecSource.$.url}`);
+                                            newPods.sources[podspecSource.$.url] = true;
+                                        });
+                                    }
+                                    if(podspecPods){
+                                        useFrameworks = podspecPods.$ && podspecPods.$['use-frameworks'] === 'true' ? 'true' : useFrameworks;
+
+                                        (podspecPods.pod || []).forEach(function (pod) {
+                                            var name = pod.$.name || pod.$.id;
+                                            newPods.pods[name] = Object.assign({type: 'pod'}, pod.$);
+                                            log(`${id} requires pod: ${name}`);
+                                        });
+                                    }
+                                }
+
                             }
                         });
                     }
