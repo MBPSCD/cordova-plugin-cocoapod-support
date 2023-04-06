@@ -36,6 +36,7 @@ module.exports = function (context) {
     var pluginDir = context.opts.plugin.pluginInfo.dir;
     var schemesSrcDir = path.join(pluginDir, 'schemes');
     var schemesTargetDir = path.join(sharedDataDir, 'xcschemes');
+    var pluginConfigPath = path.join(rootPath,"plugins","fetch.json");
     var bundlePathsToFix = [];
     var newPods = {
         pods: {},
@@ -77,7 +78,12 @@ module.exports = function (context) {
     function parsePluginXmls() {
 
         var promises = [];
-        context.opts.cordova.plugins.forEach(id => {
+
+        const pluginString =  fs.readFileSync(pluginConfigPath);
+        const pluginObj = JSON.parse(pluginString);
+        const pluginIDs = Object.keys(pluginObj);
+
+            pluginIDs.forEach(id => {
 
             const deferred = Q.defer();
 
@@ -121,7 +127,7 @@ module.exports = function (context) {
                                     newPods.pods[name] = Object.assign({type: 'pod'}, pod.$);
                                     log(`${id} requires pod: ${name}`);
                                 });
-
+                                
                                 const podspec = (platform['podspec'] || [])[0];
                                 if(podspec){
                                     const podspecConfig = (podspec['config'] || [])[0];
